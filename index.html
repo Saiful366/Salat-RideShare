@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Salat RideShare</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="wrap">
+    <div class="intro">
+      <h1>Salat RideShare</h1>
+    </div>
+
+    <!-- Role selector -->
+    <div class="card rolebar">
+      <div class="row" style="align-items:center; gap:10px;">
+        <label class="small" for="roleSelect" style="min-width:60px;">I'm a</label>
+        <select id="roleSelect" style="max-width:220px;">
+          <option value="user">User</option>
+          <option value="driver">RideSharer</option>
+        </select>
+        <span id="roleWho" class="small muted"></span>
+      </div>
+    </div>
+
+    <!-- Notice: user cancellations last hour -->
+    <div id="noticeBar" class="notice hidden"></div>
+
+    <div class="grid single" id="gridRoot">
+      <!-- USER APP -->
+      <section class="panel" data-panel="user" aria-labelledby="user-app">
+        <h2 id="user-app">User App</h2>
+
+        <div class="card">
+          <form id="requestForm">
+            <div class="row">
+              <div class="col" style="flex:1">
+                <label for="userName">Your name</label>
+                <input id="userName" type="text" placeholder="e.g., Ashraf" required />
+              </div>
+              <div class="col" style="flex:1">
+                <label for="contact">Contact (optional)</label>
+                <input id="contact" type="text" placeholder="Phone" />
+              </div>
+            </div>
+
+            <div class="spacer"></div>
+
+            <div class="col">
+              <label for="pickup">Pickup (address or description)</label>
+              <textarea id="pickup" placeholder="e.g., 123 Main St, front lobby"></textarea>
+            </div>
+
+            <div class="spacer"></div>
+
+            <div class="col">
+              <label for="notes">Notes (optional)</label>
+              <input id="notes" type="text" placeholder="e.g., 2 passengers" />
+            </div>
+
+            <div class="spacer"></div>
+
+            <div class="row">
+              <button class="btn" type="submit">Request Ride</button>
+              <!-- Clear List button intentionally removed from UI -->
+            </div>
+          </form>
+        </div>
+
+        <!-- KPIs -->
+        <div class="kpi">
+          <div class="card"><div class="small">Total Requests</div><div class="num" id="kpiTotal">0</div></div>
+          <div class="card"><div class="small">Accepted</div><div class="num" id="kpiAccepted">0</div></div>
+          <div class="card"><div class="small">Pending</div><div class="num" id="kpiPending">0</div></div>
+          <div class="card"><div class="small">Cancelled</div><div class="num" id="kpiCancelled">0</div></div>
+        </div>
+
+        <div class="spacer"></div>
+
+        <div class="card">
+          <div class="row" style="align-items:center; gap:8px;">
+            <h3 style="margin:0;font-size:16px;">All Requests</h3>
+            <span class="chip" id="windowChip">Window: 5 min</span>
+          </div>
+          <div id="userList" class="list" style="margin-top:10px"></div>
+        </div>
+
+        <!-- User-side history: ride-sharer cancellations affecting this user's requests -->
+        <div class="spacer"></div>
+        <div class="card">
+          <h3 style="margin:0 0 8px;font-size:16px;">History</h3>
+          <div id="userHistoryList" class="history-list"></div>
+        </div>
+      </section>
+
+      <!-- RIDESHARER APP -->
+      <section class="panel hidden" data-panel="driver" aria-labelledby="ridesharer-app">
+        <h2 id="ridesharer-app">RideSharer App</h2>
+
+        <!-- Login / Auth -->
+        <div class="card">
+          <div class="row" style="align-items:end; gap:10px;">
+            <div class="col" style="flex:1">
+              <label for="driverSelect">Log in as RideSharer</label>
+              <select id="driverSelect"></select>
+            </div>
+            <div class="col" style="flex:1">
+              <label for="driverPass">Password</label>
+              <input id="driverPass" type="password" placeholder="Enter passcode" />
+            </div>
+            <div class="col">
+              <label>&nbsp;</label>
+              <button class="btn" id="goOnline" type="button">Go Online</button>
+            </div>
+            <div class="col">
+              <label>&nbsp;</label>
+              <button class="btn ghost" id="logoutBtn" type="button">Log out</button>
+            </div>
+          </div>
+
+          <div id="driverAuthMsg" class="notice hidden" style="margin-top:10px;"></div>
+        </div>
+
+        <div class="spacer"></div>
+
+        <div id="driverListCard" class="card hidden">
+          <div class="row" style="align-items:center; gap:8px;">
+            <h3 style="margin:0;font-size:16px;">Open & Pending Requests</h3>
+          </div>
+          <div id="driverList" class="list" style="margin-top:10px"></div>
+        </div>
+
+        <div class="spacer"></div>
+
+        <div id="driverAcceptedCard" class="card hidden">
+          <div class="row" style="align-items:center; gap:8px;">
+            <h3 style="margin:0;font-size:16px;">Your Accepted Requests</h3>
+            <span class="tag">Send a message or cancel</span>
+          </div>
+          <div id="driverAcceptedList" class="list" style="margin-top:10px"></div>
+        </div>
+
+        <div class="spacer"></div>
+
+        <div id="activeDriverCard" class="card hidden">
+          <h3 style="margin:0 0 8px;font-size:16px;">Active RideSharer</h3>
+          <div id="activeDriver" class="small muted">No ridesharer logged in.</div>
+        </div>
+
+        <div class="spacer"></div>
+
+        <!-- History is always visible to ride sharers -->
+        <div class="card">
+          <h3 style="margin:0 0 8px;font-size:16px;">History</h3>
+          <div id="historyList" class="history-list"></div>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>
